@@ -34,7 +34,7 @@ function CabinTable() {
                 data: cabins,
                 error,
         } = useQuery({
-                queryKey: ["cabin"],
+                queryKey: ["cabins"],
                 queryFn: getCabins, // queryFn can tra ve 1 Promise
         });
         if (isLoading) return <Spinner />;
