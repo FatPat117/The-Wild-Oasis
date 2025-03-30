@@ -2,6 +2,8 @@ import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 
 import GlobalStyle from "./styles/GlobalStyle";
 
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import Account from "./pages/Account";
 import Bookings from "./pages/Bookings";
 import Cabins from "./pages/Cabins";
@@ -11,9 +13,19 @@ import PageNotFound from "./pages/PageNotFound";
 import Settings from "./pages/Settings";
 import Users from "./pages/Users";
 import AppLayout from "./ui/AppLayout";
+
+const queryCilent = new QueryClient({
+        defaultOptions: {
+                queries: {
+                        staleTime: 60 * 1000,
+                },
+        },
+});
+
 function App() {
         return (
-                <>
+                <QueryClientProvider client={queryCilent}>
+                        <ReactQueryDevtools initialIsOpen={false} />
                         <GlobalStyle />
                         <BrowserRouter>
                                 <Routes>
@@ -30,7 +42,7 @@ function App() {
                                         <Route path="*" element={<PageNotFound />} />
                                 </Routes>
                         </BrowserRouter>
-                </>
+                </QueryClientProvider>
         );
 }
 
