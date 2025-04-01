@@ -1,14 +1,14 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 import { useForm } from "react-hook-form";
-import toast from "react-hot-toast";
 
-import { createCabin, editCabin } from "../../services/apiCabins";
 import Button from "../../ui/Button";
 import FileInput from "../../ui/FileInput";
 import Form from "../../ui/Form";
 import FormRow from "../../ui/FormRow";
 import Input from "../../ui/Input";
 import Textarea from "../../ui/Textarea";
+import { useCreateCabin } from "./useCreateCabin";
+import { useEditCabin } from "./useEditCabin";
 
 function CreateCabinForm({ cabinToEdit = {} }) {
         const { id: editId, ...editValues } = cabinToEdit;
@@ -22,29 +22,11 @@ function CreateCabinForm({ cabinToEdit = {} }) {
         const queryClient = useQueryClient(); // 🛠 Sửa lỗi chính tả
 
         // Create Cabin
-        const { mutate: CreateCabin, isLoading: isCreating } = useMutation({
-                mutationFn: createCabin,
-                onSuccess: () => {
-                        toast.success("New cabin successfully created");
-                        queryClient.invalidateQueries({ queryKey: ["cabins"] });
-                        reset();
-                },
-                onError: (err) => toast.error(err.message),
-        });
+        const { isCreating, createCabin } = useCreateCabin();
 
         // Edit cabin
 
-        const { mutate: EditCabin, isLoading: isEditing } = useMutation({
-                mutationFn: ({ newCabinData, id }) => editCabin(newCabinData, id),
-                onSuccess: () => {
-                        toast.success("Cabin successfully edited");
-                        queryClient.invalidateQueries({
-                                queryKey: ["cabins"],
-                        });
-                        reset();
-                },
-                onError: (err) => toast.error(err.message),
-        });
+        const { isEditing, editCabin } = useEditCabin();
 
         const isWorking = isCreating || isEditing;
 
@@ -57,8 +39,20 @@ function CreateCabinForm({ cabinToEdit = {} }) {
                         ? data.image[0]
                         : null;
 
-                if (isEditSession) EditCabin({ newCabinData: { ...data, image }, id: editId });
-                else CreateCabin({ ...data, image });
+                if (isEditSession)
+                        editCabin(
+                                { newCabinData: { ...data, image }, id: editId },
+                                {
+                                        onSuccess: () => reset(),
+                                }
+                        );
+                else
+                        createCabin(
+                                { ...data, image },
+                                {
+                                        onSuccess: () => reset(),
+                                }
+                        );
         }
 
         return (
