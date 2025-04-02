@@ -1,5 +1,6 @@
 import supabase, { supabaseUrl } from "./supabase";
 
+// Fetch data
 export async function getCabins() {
         const { data, error } = await supabase.from("cabins").select("*");
         if (error) {
@@ -9,6 +10,7 @@ export async function getCabins() {
         return data;
 }
 
+// Delete cabin
 export async function deleteCabin(id) {
         const { data, error } = await supabase.from("cabins").delete().eq("id", id);
 
@@ -19,6 +21,7 @@ export async function deleteCabin(id) {
         return data;
 }
 
+// Create cabin
 export async function createCabin(newCabin) {
         const hasImagePath = typeof newCabin.image === "string" && newCabin.image.startsWith(supabaseUrl);
 
