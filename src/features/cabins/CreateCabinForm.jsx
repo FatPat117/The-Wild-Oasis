@@ -10,7 +10,7 @@ import Textarea from "../../ui/Textarea";
 import { useCreateCabin } from "./useCreateCabin";
 import { useEditCabin } from "./useEditCabin";
 
-function CreateCabinForm({ cabinToEdit = {} }) {
+function CreateCabinForm({ cabinToEdit = {}, onClose }) {
         const { id: editId, ...editValues } = cabinToEdit;
         const isEditSession = Boolean(editId);
 
@@ -43,20 +43,26 @@ function CreateCabinForm({ cabinToEdit = {} }) {
                         editCabin(
                                 { newCabinData: { ...data, image }, id: editId },
                                 {
-                                        onSuccess: () => reset(),
+                                        onSuccess: () => {
+                                                reset();
+                                                onClose?.();
+                                        },
                                 }
                         );
                 else
                         createCabin(
                                 { ...data, image },
                                 {
-                                        onSuccess: () => reset(),
+                                        onSuccess: () => {
+                                                reset();
+                                                onClose?.();
+                                        },
                                 }
                         );
         }
 
         return (
-                <Form onSubmit={handleSubmit(onSubmit)}>
+                <Form onSubmit={handleSubmit(onSubmit)} type={onClose ? "modal" : "regular"}>
                         <FormRow label="Cabin name" errors={errors?.name?.message}>
                                 <Input
                                         type="text"
@@ -126,10 +132,10 @@ function CreateCabinForm({ cabinToEdit = {} }) {
                         </FormRow>
 
                         <FormRow>
-                                <Button variation="secondary" type="reset">
+                                <Button variation="secondary" type="reset" onClick={() => onClose?.()}>
                                         Cancel
                                 </Button>
-                                <Button disabled={isWorking}>
+                                <Button disabled={isWorking} onClick={() => onClose?.()}>
                                         {isEditSession ? "Edit Cabin" : "Create new Cabin"}
                                 </Button>
                         </FormRow>
