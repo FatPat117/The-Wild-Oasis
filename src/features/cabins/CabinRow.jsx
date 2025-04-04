@@ -1,10 +1,12 @@
-import { useState } from "react";
 import { HiPencil, HiSquare2Stack, HiTrash } from "react-icons/hi2";
 import styled from "styled-components";
+import ConfirmDelete from "../../ui/ConfirmDelete";
+import Modal from "../../ui/Modal";
 import { formatCurrency } from "../../utils/helpers";
 import CreateCabinForm from "./CreateCabinForm";
 import { useCreateCabin } from "./useCreateCabin";
 import { useDeleteCabin } from "./useDeleteCabin";
+
 /* eslint-disable react/prop-types */
 const TableRow = styled.div`
         display: grid;
@@ -46,7 +48,6 @@ const Discount = styled.div`
 `;
 
 function CabinRow({ cabin }) {
-        const [showForm, setShowForm] = useState(false);
         const { id: cabinId, name, maxCapacity, regularPrice, discount, image, description } = cabin;
         const { isDeleting, deleteCabin } = useDeleteCabin();
         const { isCreating, createCabin } = useCreateCabin();
@@ -74,15 +75,32 @@ function CabinRow({ cabin }) {
                                         <button onClick={() => handleDuplicate()}>
                                                 <HiSquare2Stack />
                                         </button>
-                                        <button onClick={() => setShowForm(!showForm)}>
-                                                <HiPencil />
-                                        </button>
-                                        <button onClick={(e) => deleteCabin(cabinId)} disabled={isDeleting}>
-                                                <HiTrash />
-                                        </button>
+
+                                        <Modal>
+                                                <Modal.Open opens="edit">
+                                                        <button>
+                                                                <HiPencil />
+                                                        </button>
+                                                </Modal.Open>
+                                                <Modal.Window name="edit">
+                                                        <CreateCabinForm cabinToEdit={cabin} />
+                                                </Modal.Window>
+
+                                                <Modal.Open>
+                                                        <button disabled={isDeleting}>
+                                                                <HiTrash />
+                                                        </button>
+                                                </Modal.Open>
+                                                <Modal.Window>
+                                                        <ConfirmDelete
+                                                                resourceName="cabins"
+                                                                disabled={isDeleting}
+                                                                onConfirm={() => deleteCabin(cabinId)}
+                                                        />
+                                                </Modal.Window>
+                                        </Modal>
                                 </div>
                         </TableRow>
-                        {showForm && <CreateCabinForm cabinToEdit={cabin} />}
                 </>
         );
 }
