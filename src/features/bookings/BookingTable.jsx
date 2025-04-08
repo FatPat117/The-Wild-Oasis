@@ -7,7 +7,8 @@ import BookingRow from "./BookingRow";
 import { useFetchBookings } from "./useFetchBookings";
 
 function BookingTable() {
-        const { bookings, isLoading } = useFetchBookings();
+        const { bookings, isLoading, count } = useFetchBookings();
+
         if (isLoading) return <Spinner />;
         console.log(bookings);
         if (!bookings.length) return <Empty resourceName="bookings" />;
@@ -29,7 +30,7 @@ function BookingTable() {
                                 />
 
                                 <Table.Footer>
-                                        <Pagination count={100} />
+                                        <Pagination count={count} />
                                 </Table.Footer>
                         </Table>
                 </Menus>

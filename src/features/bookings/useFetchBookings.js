@@ -10,22 +10,22 @@ export function useFetchBookings() {
         const filter =
                 !filterValue || filterValue === "all" ? null : { field: "status", value: filterValue, method: "eq" }; //{ field: "status", value: filterValue };
 
-        //        SortBY
+        // SortBY
         const sortByRaw = searchParams.get("sortBy") || "startDate-desc";
 
         const [field, direction] = sortByRaw.split("-");
         const sortBy = { field, direction };
 
+        // Pagination
+        const page = !searchParams.get("page") ? 1 : Number(searchParams.get("page"));
         const {
                 isLoading,
-                data: bookings,
+                data: { data: bookings, count } = {},
                 error,
         } = useQuery({
-                queryKey: ["bookings", filter, sortBy],
-                queryFn: () => {
-                        return getBookings({ filter, sortBy });
-                },
+                queryKey: ["bookings", filter, sortBy, page],
+                queryFn: () => getBookings({ filter, sortBy, page }),
         });
 
-        return { isLoading, bookings, error };
+        return { isLoading, bookings, error, count };
 }
