@@ -13,8 +13,8 @@ import Spinner from "../../ui/Spinner";
 import { formatCurrency } from "../../utils/helpers";
 import BookingDataBox from "../bookings/BookingDataBox";
 import { useFetchBooking } from "../bookings/useFetchBooking";
+import { useSettings } from "../settings/useSettings";
 import { useUpdateCheckin } from "./useUpdateCheckin";
-
 const Box = styled.div`
         /* Box */
         background-color: var(--color-grey-0);
@@ -25,18 +25,34 @@ const Box = styled.div`
 
 function CheckinBooking() {
         const [confirmPaid, setConfirmPaid] = useState(false);
+        const [addBreakfast, setAddBreakfast] = useState(false);
+
         const { booking, isLoading } = useFetchBooking();
+        const { checkIn, isCheckingIn } = useUpdateCheckin();
+        const { settings, isLoading: isLoadingSettings } = useSettings();
+
         const moveBack = useMoveBack();
 
         useEffect(() => setConfirmPaid(booking?.isPaid ?? false), [booking]);
-        const { checkIn, isCheckingIn } = useUpdateCheckin();
-        if (isLoading) return <Spinner />;
 
+        if (isLoading || isLoadingSettings) return <Spinner />;
         const { id: bookingId, guests, totalPrice, numGuests, hasBreakfast, numNights } = booking;
+
+        const optionalBreakfastPrice = settings.breakfastPrice * numNights * numGuests;
 
         function handleCheckin() {
                 if (!confirmPaid) return;
-                checkIn(bookingId);
+
+                if (addBreakfast) {
+                        checkIn({
+                                bookingId,
+                                breakfast: {
+                                        hasBreakfast: true,
+                                        extrasPrice: optionalBreakfastPrice,
+                                        totalPrice: totalPrice + optionalBreakfastPrice,
+                                },
+                        });
+                } else checkIn({ bookingId, breafast: {} });
         }
 
         return (
@@ -47,6 +63,20 @@ function CheckinBooking() {
                         </Row>
 
                         <BookingDataBox booking={booking} />
+                        {!hasBreakfast && (
+                                <Box>
+                                        <CheckBox
+                                                checked={addBreakfast}
+                                                onChange={() => {
+                                                        setAddBreakfast((add) => !add);
+                                                        setConfirmPaid(false);
+                                                }}
+                                                id="breakfast"
+                                        >
+                                                Want to add breakfast for {formatCurrency(optionalBreakfastPrice)}?
+                                        </CheckBox>
+                                </Box>
+                        )}
                         <Box>
                                 <CheckBox
                                         checked={confirmPaid}
@@ -55,7 +85,13 @@ function CheckinBooking() {
                                         disabled={confirmPaid || isCheckingIn}
                                 >
                                         I confirm that {guests.fullName} has paid the total amount{" "}
-                                        {formatCurrency(totalPrice)}
+                                        {!addBreakfast
+                                                ? formatCurrency(totalPrice)
+                                                : `${formatCurrency(
+                                                          totalPrice + optionalBreakfastPrice
+                                                  )} includes:  ${formatCurrency(totalPrice)} + ${formatCurrency(
+                                                          optionalBreakfastPrice
+                                                  )}`}
                                 </CheckBox>
                         </Box>
                         <ButtonGroup>
