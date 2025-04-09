@@ -10,9 +10,12 @@ import Tag from "../../ui/Tag";
 import { HiArrowDownOnSquare, HiArrowUpOnSquare } from "react-icons/hi2";
 import { useNavigate } from "react-router-dom";
 import { useMoveBack } from "../../hooks/useMoveBack";
+import ConfirmDelete from "../../ui/ConfirmDelete";
+import Modal from "../../ui/Modal";
 import Spinner from "../../ui/Spinner";
 import { useUpdateCheckout } from "../check-in-out/useUpdateCheckout";
 import BookingDataBox from "./BookingDataBox";
+import { useDeleteBooking } from "./useDeleteBooking";
 import { useFetchBooking } from "./useFetchBooking";
 
 const HeadingGroup = styled.div`
@@ -25,9 +28,10 @@ function BookingDetail() {
         const navigate = useNavigate();
         const { booking, isLoading } = useFetchBooking();
         const { checkOut, isCheckingOut } = useUpdateCheckout();
+        const { deleteBooking, isDeletingBooking } = useDeleteBooking();
         const moveBack = useMoveBack();
 
-        if (isLoading) return <Spinner />;
+        if (isLoading || !booking) return <Spinner />;
 
         const { status, id: bookingId } = booking;
         const statusToTagName = {
@@ -67,6 +71,24 @@ function BookingDetail() {
                                                 Check out
                                         </Button>
                                 )}
+                                <Modal>
+                                        <Modal.Open opens="delete">
+                                                <Button variation="danger">Delete Booking</Button>
+                                        </Modal.Open>
+
+                                        <Modal.Window name="delete">
+                                                <ConfirmDelete
+                                                        resourceName="booking"
+                                                        disabled={isDeletingBooking}
+                                                        onConfirm={() => {
+                                                                deleteBooking(bookingId, {
+                                                                        onSettled: () => navigate(-1),
+                                                                });
+                                                        }}
+                                                />
+                                        </Modal.Window>
+                                </Modal>
+
                                 <Button variation="secondary" onClick={moveBack}>
                                         Back
                                 </Button>
