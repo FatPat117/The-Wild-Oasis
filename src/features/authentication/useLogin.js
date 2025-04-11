@@ -11,7 +11,7 @@ export function useLogin() {
                 onSuccess: (user) => {
                         toast.success("Login successfully");
                         queryClient.setQueriesData(["user"], user);
-                        navigate("/");
+                        navigate("/", { replace: true });
                 },
                 onError: (err) => {
                         toast.error("Login failed");
