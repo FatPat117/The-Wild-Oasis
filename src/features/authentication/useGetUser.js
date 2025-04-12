@@ -12,3 +12,4 @@ export function useGetUser() {
         });
         return { isLoading, user, error, isAuthenticated: user?.role === "authenticated" };
 }
+// Authorization on Supabase: Protecting Database (RLS)
